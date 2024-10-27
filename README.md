@@ -218,7 +218,7 @@ service bind9 restart
 
 
 ## Soal 1-5
-(1)Lakukan konfigurasi sesuai dengan peta yang sudah diberikan.
+(1) Lakukan konfigurasi sesuai dengan peta yang sudah diberikan.
 
 Jauh sebelum perang dimulai, ternyata para keluarga bangsawan, Tybur dan Fritz, telah membuat kesepakatan sebagai berikut:
 1. Semua Client harus menggunakan konfigurasi ip address dari keluarga Tybur (dhcp).
