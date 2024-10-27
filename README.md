@@ -215,3 +215,94 @@ echo "$granz" > /etc/bind/modul3/eldia.it28.com
 
 service bind9 restart
 ```
+
+
+## Soal 1-5
+(1)Lakukan konfigurasi sesuai dengan peta yang sudah diberikan.
+
+Jauh sebelum perang dimulai, ternyata para keluarga bangsawan, Tybur dan Fritz, telah membuat kesepakatan sebagai berikut:
+1. Semua Client harus menggunakan konfigurasi ip address dari keluarga Tybur (dhcp).
+3. Client yang melalui bangsa marley mendapatkan range IP dari [prefix IP].1.05 - [prefix IP].1.25 dan [prefix IP].1.50 - [prefix IP].1.100 (2)
+4. Client yang melalui bangsa eldia mendapatkan range IP dari [prefix IP].2.09 - [prefix IP].2.27 dan [prefix IP].2 .81 - [prefix IP].2.243 (3)
+Client mendapatkan DNS dari keluarga Fritz dan dapat terhubung dengan internet melalui DNS tersebut (4)
+5. Dikarenakan keluarga Tybur tidak menyukai kaum eldia, maka mereka hanya meminjamkan ip address ke kaum eldia selama 6 menit. Namun untuk kaum marley, keluarga Tybur meminjamkan ip address selama 30 menit. Waktu maksimal dialokasikan untuk peminjaman alamat IP selama 87 menit. (5)
+
+### Script
+> soal1-5.sh (Paradis)
+```
+apt-get update
+apt install isc-dhcp-relay -y
+
+service isc-dhcp-relay start 
+
+echo '# Defaults for isc-dhcp-relay initscript
+
+# sourced by /etc/init.d/isc-dhcp-relay
+# installed at /etc/default/isc-dhcp-relay by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# What servers should the DHCP relay forward requests to?
+SERVERS="192.247.4.3" 
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES="eth1 eth2 eth3 eth4"
+
+# Additional options that are passed to the DHCP relay daemon?
+OPTIONS=""' > /etc/default/isc-dhcp-relay
+
+
+echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
+
+service isc-dhcp-relay restart
+```
+
+> soal1-5 (Tybur)
+```
+apt-get update
+apt-get install isc-dhcp-server -y
+
+echo 'INTERFACESv4="eth0"
+INTERFACESv6=""
+' > /etc/default/isc-dhcp-server
+
+subnet="option domain-name \"example.org\";
+option domain-name-servers ns1.example.org, ns2.example.org;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+ddns-update-style-none;
+
+subnet 192.247.1.0 netmask 255.255.255.0 {
+    range 192.247.1.5 192.247.1.25;
+    range 192.247.1.50 10.247.1.100;
+    option routers 192.247.1.1;
+    option broadcast-address 192.247.1.255;
+    option domain-name-servers 192.247.4.2;
+    default-lease-time 360;
+    max-lease-time 5220;
+}
+
+subnet 192.247.2.0 netmask 255.255.255.0 {
+    range 192.247.2.9 192.247.2.27;
+    range 192.247.2.81 192.247.2.243;
+    option routers 192.247.2.1;
+    option broadcast-address 192.247.2.255;
+    option domain-name-servers 192.247.4.2;
+    default-lease-time 1800;
+    max-lease-time 5220;
+}
+
+subnet 192.247.3.0 netmask 255.255.255.0 {
+}
+
+subnet 192.247.4.0 netmask 255.255.255.0 {
+}
+
+"
+echo "$subnet" > /etc/dhcp/dhcpd.conf
+
+service isc-dhcp-server restart
